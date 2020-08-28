@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Graphics } from "pixi.js";
 import { PixiComponent, Stage, Container, AppConsumer, useTick } from "@inlet/react-pixi";
 
@@ -6,8 +6,9 @@ const Game = () => {
 
     useTick((delta) => {
 
-        // console.log("something");
-        // runGame();
+        // console.log(delta);
+        
+
     });
     
     
@@ -37,10 +38,11 @@ const Game = () => {
     });
 
     // const [pixels, setPixels] = useState([]);
-    const [columns, setColumns] = useState(5);
-    const [rows, setRows] = useState(5);
+    const [columns, setColumns] = useState(30);
+    const [rows, setRows] = useState(30);
+    const [pixels, setPixels] = useState([]);
 
-    let pixels = [];
+    // let pixels = [];
     // for (let i = 0; i < columns; i++) {
     //     pixels.push([])
     // }
@@ -51,14 +53,13 @@ const Game = () => {
 
     // let pixelItem = <Pixel key={i + "-" + j} coordinates={[i, j]} x={i * 1.5} y={j * 1.5} alive={Math.random() >= 0.5} width={3} height={3} fill={0xffffff} />
     
-    const runGame = () => {
+    const initialSeed = () => {
         for (let i = 0; i < columns; i++) {
             pixels.push([]);
             for (let j = 0; j < rows; j++) {
                 pixels[i].push(
                   <Pixel
                     key={i + "-" + j}
-                    coordinates={[i, j]}
                     x={i * 1.5}
                     y={j * 1.5}
                     alive={Math.random() >= 0.5}
@@ -71,7 +72,7 @@ const Game = () => {
         }
     }
 
-    runGame();
+    initialSeed();
 
     console.log(pixels);
     console.log(pixels[4][4]);
@@ -94,16 +95,100 @@ const Game = () => {
         if (isAlive(x, y + 1)) neighbors++;
         if (isAlive(x + 1, y + 1)) neighbors++;
         
-        console.log(`${x}, ${y} has ${neighbors} neighbors`);
+        return neighbors;
+        // console.log(`${x}, ${y} has ${neighbors} neighbors`);
     };
 
-    for (let i = 0; i < pixels.length; i++) {
-        for (let j = 0; j < pixels[i].length; j++) {
-            calculateNeighbors(i, j);
+    // const update = () => {
+    //     let nextPixels = [];
+    //     for (let i = 0; i < pixels.length; i++) {
+    //         nextPixels.push([]);
+    //         for (let j = 0; j < pixels[i].length; j++) {
+    //             let neighbors = calculateNeighbors(i, j);
+    //             // if (neighbors < 2 || neighbors > 3) {
+    //             //     pixels[i].push(
+    //             //         <Pixel
+    //             //             key={i + "-" + j}
+    //             //             coordinates={[i, j]}
+    //             //             x={i * 1.5}
+    //             //             y={j * 1.5}
+    //             //             alive={false}
+    //             //             width={3}
+    //             //             height={3}
+    //             //             fill={0xffffff}
+    //             //         />
+    //             //     );
+    //             // } else if (neighbors === 3) {
+    //             //     pixels[i].push(
+    //             //         <Pixel
+    //             //         key={i + "-" + j}
+    //             //         coordinates={[i, j]}
+    //             //         x={i * 1.5}
+    //             //         y={j * 1.5}
+    //             //         alive={true}
+    //             //         width={3}
+    //             //         height={3}
+    //             //         fill={0xffffff}
+    //             //         />
+    //             //     );
+    //             // }
+    //         }
+    //     }
+    //     console.log(nextPixels);
+    // }
+
+    const update = () => {
+        let updated = [];
+        for (let i = 0; i < columns; i++) {
+            updated.push([]);
+            for (let j = 0; j < rows; j++) {
+                let neighbors = calculateNeighbors(i, j);
+                if (neighbors < 2 || neighbors > 3) {
+                    // console.log(`DEAD: ${i}, ${j} has ${neighbors} neighbors`);
+                    updated[i].push(
+                      <Pixel
+                        key={i + "-" + j}
+                        coordinates={[i, j]}
+                        x={i * 1.5}
+                        y={j * 1.5}
+                        alive={false}
+                        width={3}
+                        height={3}
+                        fill={0xffffff}
+                      />
+                    );
+                } else if (neighbors === 3) {
+                    // console.log(`LIVES: ${i}, ${j} has ${neighbors} neighbors`);
+                    updated[i].push(
+                      <Pixel
+                        key={i + "-" + j}
+                        coordinates={[i, j]}
+                        x={i * 1.5}
+                        y={j * 1.5}
+                        alive={true}
+                        width={3}
+                        height={3}
+                        fill={0xffffff}
+                      />
+                    );
+                }
+            }
         }
+        setPixels(updated);
     }
 
+    // update();
 
+    // console.log(pixels);
+
+
+
+    useEffect(() => {
+        setTimeout(function () {
+            update();
+            console.log(`Update Ran: ${Date.now()}`);
+        }, 200);
+    }, [pixels]);
 
 
     // const neighborCalc = (x, y) => {
@@ -125,7 +210,7 @@ const Game = () => {
 
     // runGame();
 
-    let aliveNeighbors = 0;
+    // let aliveNeighbors = 0;
     // for (let i = 0; i < pixels.length; i++) {
         
     //     // left
